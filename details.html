@@ -1,0 +1,28 @@
+@model YourProjectNamespace.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+    var role = ViewBag.Role as string ?? "customer";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="p-4">
+    <div class="container">
+        <h2>Order Details - Order #@Model.OrderId</h2>
+
+        <table class="table table-bordered">
+            <tr><th>User ID</th><td>@Model.UserId</td></tr>
+            <tr><th>Total Amount</th><td>@Model.TotalAmount</td></tr>
+            <tr><th>Order Date</th><td>@Model.OrderDate.ToShortDateString()</td></tr>
+            <tr><th>Status</th><td>@Model.Status</td></tr>
+        </table>
+
+        <a href="/Order" class="btn btn-secondary">Back to Orders</a>
+    </div>
+</body>
+</html>
