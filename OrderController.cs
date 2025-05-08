@@ -1,68 +1,34 @@
+// OrderController.cs
 using Microsoft.AspNetCore.Mvc;
-using YourProjectNamespace.Models;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using YourProjectNamespace.Models; // Replace with your actual namespace
 using System.Linq;
-using System;
+using System.Threading.Tasks;
 
-namespace YourProjectNamespace.Controllers
+public class OrderController : Controller
 {
-    public class OrderController : Controller
+    private readonly YourDbContext _context; // Replace with your actual DbContext
+
+    public OrderController(YourDbContext context)
     {
-        // Simulated DB
-        private static List<Order> Orders = new List<Order>
-        {
-            new Order { OrderId = 1, UserId = 101, TotalAmount = 199.99M, OrderDate = DateTime.Now.AddDays(-3), Status = "PENDING" },
-            new Order { OrderId = 2, UserId = 102, TotalAmount = 150.00M, OrderDate = DateTime.Now.AddDays(-1), Status = "SHIPPED" }
-        };
+        _context = context;
+    }
 
-        public IActionResult Index()
-        {
-            // Simulate role ("admin" or "customer")
-            ViewBag.Role = "admin"; // Change to "customer" to test
-            return View(Orders);
-        }
-
-        public IActionResult Details(int orderId)
-        {
-            var order = Orders.FirstOrDefault(o => o.OrderId == orderId);
-            if (order == null)
-                return NotFound();
-
-            ViewBag.Role = "admin"; // Or "customer"
-            return View(order);
-        }
-
-        [HttpPost]
-        public IActionResult Create(int userId, decimal totalAmount)
-        {
-            var newOrder = new Order
+    public IActionResult Index()
+    {
+        var orders = _context.Orders
+            .Include(o => o.User) // Assuming Order has a navigation property to User
+            .Select(o => new OrderViewModel
             {
-                OrderId = Orders.Max(o => o.OrderId) + 1,
-                UserId = userId,
-                TotalAmount = totalAmount,
-                OrderDate = DateTime.Now,
-                Status = "PENDING"
-            };
-            Orders.Add(newOrder);
-            return Json(newOrder);
-        }
+                OrderId = o.OrderId,
+                TotalAmount = o.TotalAmount,
+                OrderDate = o.OrderDate,
+                Status = o.Status,
+                CustomerName = o.User.Name // Replace with actual User property
+            }).ToList();
 
-        [HttpPost]
-        public IActionResult UpdateStatus(int orderId, string status)
-        {
-            var order = Orders.FirstOrDefault(o => o.OrderId == orderId);
-            if (order != null)
-            {
-                order.Status = status;
-            }
-            return Json(order);
-        }
+        ViewBag.Role = User.IsInRole("admin") ? "admin" : "customer";
 
-        [HttpPost]
-        public IActionResult Delete(int orderId)
-        {
-            Orders = Orders.Where(o => o.OrderId != orderId).ToList();
-            return Json(new { success = true });
-        }
+        return View(orders);
     }
 }
