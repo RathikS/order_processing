@@ -78,7 +78,14 @@
                             <select class="form-select" name="status" disabled="@((role != "admin") ? "disabled" : "")">
                                 @foreach (var status in new[] { "PENDING", "SHIPPED", "DELIVERED", "CANCELLED" })
                                 {
-                                    <option value="@status" @(order.Status == status ? "selected" : "")>@status</option>
+                                    @if (order.Status == status)
+                                    {
+                                        <option value="@status" selected>@status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
                                 }
                             </select>
                         </td>
